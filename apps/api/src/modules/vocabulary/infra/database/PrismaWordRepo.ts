@@ -88,5 +88,12 @@ export class PrismaWordRepo implements IWordRepository {
       }
     });
   }
+
+  async deleteByIdForUser(wordId: string, userId: string): Promise<boolean> {
+    const res = await this.prisma.word.deleteMany({
+      where: { id: wordId, userId }
+    });
+    return res.count > 0;
+  }
 }
 

@@ -22,6 +22,10 @@ class InMemoryWordRepo implements IWordRepository {
   async save(word: any): Promise<void> {
     this.words.push({ userId: word.userId, text: word.text });
   }
+
+  async deleteByIdForUser(): Promise<boolean> {
+    return false;
+  }
 }
 
 class FakeTranslationService implements ITranslationService {
@@ -50,6 +54,10 @@ class InMemoryUserRepo implements IUserRepository {
   async save(user: any): Promise<void> {
     this.ids.add(user.id);
   }
+
+  seed(id: string) {
+    this.ids.add(id);
+  }
 }
 
 describe("AddWordUseCase (no infra)", () => {
@@ -57,6 +65,7 @@ describe("AddWordUseCase (no infra)", () => {
     const repo = new InMemoryWordRepo();
     const svc = new FakeTranslationService();
     const userRepo = new InMemoryUserRepo();
+    userRepo.seed("u1");
     const uc = new AddWordUseCase(repo, svc, userRepo);
 
     const r1 = await uc.execute({ userId: "u1", text: "hello" });

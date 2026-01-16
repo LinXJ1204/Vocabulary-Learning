@@ -1,10 +1,12 @@
 import { Router } from "express";
 import type { AddWordUseCase } from "../../useCases/addWord/AddWordUseCase";
 import type { ListWordsUseCase } from "../../useCases/listWords/ListWordsUseCase";
+import type { DeleteWordUseCase } from "../../useCases/deleteWord/DeleteWordUseCase";
 
 export function buildVocabularyRouter(deps: {
   addWordUseCase: AddWordUseCase;
   listWordsUseCase: ListWordsUseCase;
+  deleteWordUseCase: DeleteWordUseCase;
 }) {
   const router = Router();
 
@@ -22,6 +24,18 @@ export function buildVocabularyRouter(deps: {
   router.post("/words", async (req, res) => {
     try {
       const result = await deps.addWordUseCase.execute(req.body);
+      if (result.ok) return res.status(200).json(result);
+      return res.status(400).json(result);
+    } catch (e) {
+      return res.status(500).json({ ok: false, error: { message: "Internal error", details: e } });
+    }
+  });
+
+  router.delete("/words/:id", async (req, res) => {
+    try {
+      const wordId = String(req.params.id ?? "");
+      const userId = String(req.query.userId ?? "");
+      const result = await deps.deleteWordUseCase.execute({ userId, wordId });
       if (result.ok) return res.status(200).json(result);
       return res.status(400).json(result);
     } catch (e) {

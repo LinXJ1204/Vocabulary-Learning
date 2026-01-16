@@ -5,6 +5,7 @@
   "dependencies": {
     "@evb/shared-types": "workspace:*",
     "@prisma/client": "^6.2.1",
+    "@google/generative-ai": "^0.24.0",
     "dotenv": "^16.4.7",
     "express": "^4.21.2"
   },
@@ -18,8 +19,8 @@
   },
   "scripts": {
     "dev": "tsx watch src/app.ts",
-    "build": "prisma generate && tsc -p tsconfig.json",
-    "typecheck": "prisma generate && tsc -p tsconfig.json --noEmit",
+    "build": "pnpm --filter @evb/shared-types build && prisma generate && tsc -p tsconfig.json",
+    "typecheck": "pnpm --filter @evb/shared-types build && prisma generate && tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",

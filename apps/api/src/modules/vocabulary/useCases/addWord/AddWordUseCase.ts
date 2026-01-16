@@ -3,8 +3,6 @@ import type { IWordRepository } from "../../repos/IWordRepository";
 import type { ITranslationService } from "../../services/ITranslationService";
 import { Word } from "../../domain/Word";
 import type { IUserRepository } from "../../../identity/repos/IUserRepository";
-import { User } from "../../../identity/domain/User";
-import { createHash } from "node:crypto";
 
 export class AddWordUseCase {
   constructor(
@@ -23,13 +21,10 @@ export class AddWordUseCase {
     // Ensure referenced user exists (DB enforces FK Word.userId -> User.id).
     const existingUser = await this.userRepo.findById(userId);
     if (!existingUser) {
-      const hash = createHash("sha256").update(userId).digest("hex").slice(0, 16);
-      const email = `${hash}@demo.local`;
-      const userOrError = User.create({ email, role: "user" }, userId);
-      if (userOrError.isFailure) {
-        return { ok: false, error: { message: String(userOrError.error ?? "Invalid user") } };
-      }
-      await this.userRepo.save(userOrError.getValue());
+      return {
+        ok: false,
+        error: { message: "User not found", code: "USER_NOT_FOUND" }
+      };
     }
 
     const existing = await this.wordRepo.findByUserIdAndText(userId, text);

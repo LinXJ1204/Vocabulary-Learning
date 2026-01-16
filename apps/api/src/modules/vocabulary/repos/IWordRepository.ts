@@ -5,5 +5,6 @@ export interface IWordRepository {
   findByUserIdAndText(userId: string, text: string): Promise<Word | null>;
   listByUserId(userId: string): Promise<Word[]>;
   save(word: Word): Promise<void>;
+  deleteByIdForUser(wordId: string, userId: string): Promise<boolean>;
 }
 

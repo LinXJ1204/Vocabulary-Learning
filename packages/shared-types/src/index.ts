@@ -8,6 +8,19 @@ export type ApiResponse<T> =
   | { ok: true; data: T }
   | { ok: false; error: ApiError };
 
+// Identity DTOs
+export type CreateUserRequestDTO = {
+  email: string;
+};
+
+export type UserDTO = {
+  id: string;
+  email: string;
+  role: "user" | "admin";
+};
+
+export type CreateUserResponseDTO = UserDTO;
+
 // Vocabulary DTOs
 export type AddWordRequestDTO = {
   userId: string;
