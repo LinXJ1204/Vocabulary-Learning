@@ -15,10 +15,7 @@ services:
     restart: unless-stopped
 
   evb_api:
-    build:
-      context: .
-      dockerfile: apps/api/Dockerfile
-    image: evb-api:local
+    image: "${EVB_API_IMAGE:-evb-api:local}"
     environment:
       NODE_ENV: production
       PORT: 4000
@@ -42,10 +39,7 @@ services:
     restart: unless-stopped
 
   evb_web:
-    build:
-      context: .
-      dockerfile: apps/web/Dockerfile
-    image: evb-web:local
+    image: "${EVB_WEB_IMAGE:-evb-web:local}"
     environment:
       NODE_ENV: production
       PORT: 3000

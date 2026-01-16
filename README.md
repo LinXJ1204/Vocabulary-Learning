@@ -68,3 +68,26 @@ curl "http://localhost:4000/health"
   - Open `http://localhost:3000/words`
   - Click **使用 Google 登入**
   - Add a word and refresh — it should persist in Postgres
+
+## EC2 (pull images)
+
+Use `docker-compose.ec2.yml` to run on EC2. This file expects image tags via env vars:
+
+- `EVB_API_IMAGE` (ex: `ghcr.io/you/evb-api:prod`)
+- `EVB_WEB_IMAGE` (ex: `ghcr.io/you/evb-web:prod`)
+
+Required env for the stack (in an `.env` next to `docker-compose.ec2.yml`):
+
+- `PUBLIC_BASE_URL` (ex: `https://vocab.yourdomain.com`)
+- `PUBLIC_HOST` (ex: `vocab.yourdomain.com`)
+- `CADDY_EMAIL`
+- `JWT_SECRET`
+- `GOOGLE_CLIENT_ID`
+- `GOOGLE_CLIENT_SECRET`
+
+Start:
+
+```bash
+docker compose -f docker-compose.ec2.yml pull
+docker compose -f docker-compose.ec2.yml up -d
+```
