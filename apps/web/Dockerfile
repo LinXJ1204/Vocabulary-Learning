@@ -40,10 +40,12 @@ ENV NODE_ENV=production
 ENV PORT=3000
 
 COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/apps/web/node_modules ./apps/web/node_modules
 COPY --from=builder /app/apps/web/.next ./apps/web/.next
 COPY --from=builder /app/apps/web/public ./apps/web/public
 COPY --from=builder /app/apps/web/package.json ./apps/web/package.json
 
+WORKDIR /app/apps/web
 EXPOSE 3000
-CMD ["pnpm", "--filter", "@evb/web", "start", "--", "-p", "3000", "-H", "0.0.0.0"]
+CMD ["node", "/app/apps/web/node_modules/next/dist/bin/next", "start", "-p", "3000", "-H", "0.0.0.0"]
 
