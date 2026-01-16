@@ -6,5 +6,6 @@ export interface IWordRepository {
   listByUserId(userId: string): Promise<Word[]>;
   save(word: Word): Promise<void>;
   deleteByIdForUser(wordId: string, userId: string): Promise<boolean>;
+  countCreatedByUserIdBetween(userId: string, start: Date, end: Date): Promise<number>;
 }
 

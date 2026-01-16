@@ -27,6 +27,19 @@ export class AddWordUseCase {
       };
     }
 
+    // Daily quota (UTC)
+    const limit = Number(process.env.DAILY_ADD_LIMIT ?? "30");
+    const now = new Date();
+    const start = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 0, 0, 0));
+    const end = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1, 0, 0, 0));
+    const todayCount = await this.wordRepo.countCreatedByUserIdBetween(userId, start, end);
+    if (todayCount >= limit) {
+      return {
+        ok: false,
+        error: { message: `Daily limit exceeded (${limit})`, code: "QUOTA_EXCEEDED" }
+      };
+    }
+
     const existing = await this.wordRepo.findByUserIdAndText(userId, text);
     if (existing) {
       return { ok: false, error: { message: "Word already exists", code: "WORD_DUPLICATE" } };

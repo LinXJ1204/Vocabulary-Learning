@@ -1,8 +1,8 @@
 "use client";
 
-import type { UserDTO, WordDTO } from "@evb/shared-types";
+import type { WordDTO } from "@evb/shared-types";
 import { useActionState, useRef, useState, useTransition } from "react";
-import { addWordAction, deleteWordAction, ensureUserAction, logoutAction, type ActionState } from "./actions";
+import { addWordAction, deleteWordAction, type ActionState } from "./actions";
 import { Badge } from "../../components/ui/Badge";
 import { Button } from "../../components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/Card";
@@ -172,7 +172,7 @@ export function WordsClient(props: {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <form action={logoutAction}>
+          <form action="/logout" method="GET">
             <Button type="submit" variant="secondary" size="sm">
               Logout
             </Button>
@@ -295,12 +295,7 @@ export function WordsClient(props: {
   );
 }
 
-export function SignInClient() {
-  const [state, action, pending] = useActionState<ActionState<UserDTO>, FormData>(
-    ensureUserAction,
-    { ok: true }
-  );
-
+export function SignInClient(props: { loginUrl: string }) {
   return (
     <main className="mx-auto max-w-lg px-4 py-12">
       <Card>
@@ -308,20 +303,14 @@ export function SignInClient() {
           <CardTitle>Sign in</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-mutedForeground">
-            Enter your email to create or load your account.
-          </p>
+          <p className="text-sm text-mutedForeground">使用 Google 登入後即可開始新增與複習單字。</p>
 
-          <form action={action} className="mt-4 grid gap-3">
-            <label className="grid gap-2">
-              <span className="text-sm text-mutedForeground">Email</span>
-              <Input name="email" placeholder="you@example.com" disabled={pending} />
-            </label>
-            <Button type="submit" disabled={pending}>
-              {pending ? "Working..." : "Continue"}
-            </Button>
-          </form>
-          <ErrorText message={state.ok ? undefined : state.error} />
+          <a
+            href={props.loginUrl}
+            className="mt-4 inline-flex h-10 w-full items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primaryForeground hover:bg-primary/90"
+          >
+            使用 Google 登入
+          </a>
         </CardContent>
       </Card>
     </main>

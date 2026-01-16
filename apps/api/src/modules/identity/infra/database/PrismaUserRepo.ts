@@ -22,6 +22,14 @@ export class PrismaUserRepo implements IUserRepository {
     return mapped.getValue();
   }
 
+  async findByGoogleId(googleId: string): Promise<User | null> {
+    const raw = await this.prisma.user.findUnique({ where: { googleId } });
+    if (!raw) return null;
+    const mapped = UserMapper.toDomain(raw);
+    if (mapped.isFailure) throw new Error(String(mapped.error));
+    return mapped.getValue();
+  }
+
   async save(user: User): Promise<void> {
     const data = UserMapper.toPersistenceCreate(user);
     await this.prisma.user.upsert({

@@ -18,7 +18,7 @@ Monorepo scaffold for a Domain-Driven Design (DDD) English vocabulary learning p
 pnpm install
 ```
 
-2) Start Postgres (host port 5433)
+2) Start Postgres (host port 5435)
 
 ```bash
 docker compose up -d
@@ -29,6 +29,19 @@ docker compose up -d
 - Copy `env.example` to:
   - `apps/api/.env`
   - `apps/web/.env.local`
+
+- For Google login, you must set these in `apps/api/.env`:
+  - `GOOGLE_CLIENT_ID`
+  - `GOOGLE_CLIENT_SECRET`
+  - `JWT_SECRET`
+
+  And in Google Cloud Console, add an **Authorized redirect URI**:
+  - `http://localhost:4000/auth/google/callback`
+
+  If you're not running on localhost (e.g. testing on phone/PWA), set:
+  - `API_BASE_URL` to your API's reachable URL (ex: `http://192.168.1.10:4000`)
+  - `WEB_BASE_URL` to your web's reachable URL (ex: `http://192.168.1.10:3000`)
+  And add the matching redirect URI: `${API_BASE_URL}/auth/google/callback`
 
 4) Run Prisma migrations (API)
 
@@ -44,16 +57,14 @@ pnpm dev
 
 ### Quick test
 
-- Add a word:
+- Health check:
 
 ```bash
-curl -X POST "http://localhost:4000/vocabulary/words" \
-  -H "content-type: application/json" \
-  -d '{"userId":"demo-user-id","text":"hello"}'
+curl "http://localhost:4000/health"
 ```
 
-- List words:
-
-```bash
-curl "http://localhost:4000/vocabulary/words?userId=demo-user-id"
-```
+- Manual E2E (Google login + Postgres):
+  - Start API + Web (`pnpm dev`)
+  - Open `http://localhost:3000/words`
+  - Click **使用 Google 登入**
+  - Add a word and refresh — it should persist in Postgres

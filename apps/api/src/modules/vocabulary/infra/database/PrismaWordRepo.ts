@@ -95,5 +95,17 @@ export class PrismaWordRepo implements IWordRepository {
     });
     return res.count > 0;
   }
+
+  async countCreatedByUserIdBetween(userId: string, start: Date, end: Date): Promise<number> {
+    return await this.prisma.word.count({
+      where: {
+        userId,
+        createdAt: {
+          gte: start,
+          lt: end
+        }
+      }
+    });
+  }
 }
 

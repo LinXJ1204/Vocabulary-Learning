@@ -21,9 +21,10 @@ export type UserDTO = {
 
 export type CreateUserResponseDTO = UserDTO;
 
+export type MeResponseDTO = UserDTO;
+
 // Vocabulary DTOs
 export type AddWordRequestDTO = {
-  userId: string;
   text: string;
 };
 

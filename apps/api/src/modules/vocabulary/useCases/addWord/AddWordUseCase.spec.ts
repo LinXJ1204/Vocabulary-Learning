@@ -6,6 +6,7 @@ import type { IUserRepository } from "../../../identity/repos/IUserRepository";
 
 class InMemoryWordRepo implements IWordRepository {
   private words: Array<{ userId: string; text: string }> = [];
+  private count = 0;
 
   async findById(): Promise<any> {
     return null;
@@ -21,10 +22,15 @@ class InMemoryWordRepo implements IWordRepository {
 
   async save(word: any): Promise<void> {
     this.words.push({ userId: word.userId, text: word.text });
+    this.count += 1;
   }
 
   async deleteByIdForUser(): Promise<boolean> {
     return false;
+  }
+
+  async countCreatedByUserIdBetween(): Promise<number> {
+    return this.count;
   }
 }
 
@@ -48,6 +54,10 @@ class InMemoryUserRepo implements IUserRepository {
   }
 
   async findByEmail(): Promise<any> {
+    return null;
+  }
+
+  async findByGoogleId(): Promise<any> {
     return null;
   }
 
