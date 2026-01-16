@@ -8,6 +8,7 @@ import { Button } from "../../components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/Card";
 import { Input } from "../../components/ui/Input";
 import { Modal } from "../../components/ui/Modal";
+import { WordSpeaker } from "../../components/WordSpeaker";
 
 function ErrorText({ message }: { message?: string }) {
   if (!message) return null;
@@ -234,7 +235,10 @@ export function WordsClient(props: {
                         >
                           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                             <div className="space-y-1">
-                              <div className="text-2xl font-semibold mb-4">{w.text}</div>
+                              <div className="mb-4 flex items-center justify-between gap-2">
+                                <div className="text-2xl font-semibold">{w.text}</div>
+                                <WordSpeaker text={w.text} />
+                              </div>
                               <div className="text-sm text-mutedForeground">
                                 <span className="font-medium text-foreground">中文釋義</span>：{" "}
                                 {meaning || "—"}
@@ -249,11 +253,17 @@ export function WordsClient(props: {
                           <div className="mt-2 grid gap-2 text-sm leading-relaxed break-words">
                             <div>
                               <span className="font-medium">詞性</span>：
+                              
                               <span className="text-mutedForeground"> {part}</span>
                             </div>
                             <div>
-                              <span className="font-medium">例句</span>：
-                              <span className="text-mutedForeground"> {exampleSentence}</span>
+                              <div className="flex items-center">
+                                <div className="font-medium">例句：</div>
+                                <WordSpeaker text={exampleSentence} ariaLabel="播放例句發音" rate={0.95} size="sm" />
+                              </div>
+                              <div className="flex items-start py-1">
+                                <span className="text-mutedForeground"> {exampleSentence}</span>
+                              </div>
                             </div>
 {/*                             <div>
                               <span className="font-medium">例句翻譯</span>：
