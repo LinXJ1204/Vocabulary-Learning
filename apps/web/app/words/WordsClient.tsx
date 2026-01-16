@@ -202,16 +202,16 @@ export function WordsClient(props: {
                         >
                           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                             <div className="space-y-1">
-                              <div className="text-base font-semibold">{w.text}</div>
+                              <div className="text-2xl font-semibold mb-4">{w.text}</div>
                               <div className="text-sm text-mutedForeground">
                                 <span className="font-medium text-foreground">中文釋義</span>：{" "}
                                 {meaning || "—"}
                               </div>
                             </div>
-                            <div className="text-xs text-mutedForeground sm:text-right">
+                  {/*           <div className="text-xs text-mutedForeground sm:text-right">
                               <div>建立時間</div>
                               <div className="font-mono">{new Date(w.createdAt).toLocaleString()}</div>
-                            </div>
+                            </div> */}
                           </div>
 
                           <div className="mt-2 grid gap-2 text-sm leading-relaxed break-words">
@@ -223,13 +223,13 @@ export function WordsClient(props: {
                               <span className="font-medium">例句</span>：
                               <span className="text-mutedForeground"> {exampleSentence}</span>
                             </div>
-                            <div>
+{/*                             <div>
                               <span className="font-medium">例句翻譯</span>：
                               <span className="text-mutedForeground"> {exampleTranslation}</span>
-                            </div>
+                            </div> */}
                           </div>
 
-                          <div className="mt-3 flex flex-wrap gap-2">
+                          {/* <div className="mt-3 flex flex-wrap gap-2">
                             <Badge>複習次數：{w.stats.reviewCount}</Badge>
                             {w.stats.nextReviewDate ? (
                               <Badge>
@@ -238,7 +238,7 @@ export function WordsClient(props: {
                             ) : (
                               <Badge>下次複習：—</Badge>
                             )}
-                          </div>
+                          </div> */}
                         </SwipeToDeleteItem>
                       );
                     })()}

@@ -2,9 +2,15 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import "./globals.css";
 
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: "#0f172a"
+};
+
 export const metadata = {
   applicationName: "English Vocabulary Builder",
-  themeColor: "#0f172a",
   manifest: "/manifest.webmanifest",
   appleWebApp: {
     capable: true,
