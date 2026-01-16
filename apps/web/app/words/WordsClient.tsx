@@ -202,7 +202,7 @@ export function WordsClient(props: {
                 {addPending ? "Adding..." : "Add"}
               </Button>
             </form>
-            <ErrorText message={addState.ok ? undefined : addState.error} />
+            <ErrorText message={addState.ok ? undefined : addState.error?.includes("Internal error") ? "Something went wrong. Please try again." : addState.error} />
           </CardContent>
         </Card>
       </section>
