@@ -1,0 +1,16 @@
+{
+  email {$CADDY_EMAIL}
+}
+
+# Single-domain routing so auth cookie works (cookies don't support ports, but do depend on domain/subdomain).
+# - Web: / (Next.js)
+# - API: /auth/* /identity/* /vocabulary/* /health
+{$PUBLIC_HOST} {
+  encode zstd gzip
+
+  @api path /auth/* /identity/* /vocabulary/* /health
+  reverse_proxy @api evb_api:4000
+
+  reverse_proxy evb_web:3000
+}
+

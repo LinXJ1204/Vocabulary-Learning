@@ -10,7 +10,12 @@
     "build": "turbo run build",
     "test": "turbo run test",
     "lint": "turbo run lint",
-    "typecheck": "turbo run typecheck"
+    "typecheck": "turbo run typecheck",
+    "docker:build:api": "docker build -f apps/api/Dockerfile -t evb-api:local .",
+    "docker:build:web": "docker build -f apps/web/Dockerfile -t evb-web:local .",
+    "docker:build": "pnpm -s docker:build:api && pnpm -s docker:build:web",
+    "docker:up:ec2": "docker compose -f docker-compose.ec2.yml up -d --build",
+    "docker:down:ec2": "docker compose -f docker-compose.ec2.yml down"
   },
   "devDependencies": {
     "turbo": "^2.3.4"

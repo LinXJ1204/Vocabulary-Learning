@@ -3,8 +3,12 @@ import type { ApiResponse, WordDTO } from "@evb/shared-types";
 import { SignInClient, WordsClient } from "./WordsClient";
 import { Card, CardContent } from "../../components/ui/Card";
 
-function apiBaseUrl(): string {
+function apiPublicBaseUrl(): string {
   return process.env.API_BASE_URL ?? "http://localhost:4000";
+}
+
+function apiInternalBaseUrl(): string {
+  return process.env.API_INTERNAL_BASE_URL ?? process.env.API_BASE_URL ?? "http://localhost:4000";
 }
 
 export default async function WordsPage(props: {
@@ -12,9 +16,9 @@ export default async function WordsPage(props: {
 }) {
   const jar = await cookies();
   const cookieHeader = jar.toString();
-  const loginUrl = `${apiBaseUrl()}/auth/google`;
+  const loginUrl = `${apiPublicBaseUrl()}/auth/google`;
 
-  const meRes = await fetch(`${apiBaseUrl()}/identity/me`, {
+  const meRes = await fetch(`${apiInternalBaseUrl()}/identity/me`, {
     headers: { cookie: cookieHeader },
     cache: "no-store"
   });
@@ -36,7 +40,7 @@ export default async function WordsPage(props: {
     );
   }
 
-  const wordsRes = await fetch(`${apiBaseUrl()}/vocabulary/words`, {
+  const wordsRes = await fetch(`${apiInternalBaseUrl()}/vocabulary/words`, {
     headers: { cookie: cookieHeader },
     cache: "no-store"
   });

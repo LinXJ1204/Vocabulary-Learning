@@ -1,0 +1,20 @@
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: evb
+      POSTGRES_PASSWORD: evb_password
+      POSTGRES_DB: evb_dev
+    ports:
+      - "5435:5432"
+    volumes:
+      - evb_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U evb -d evb_dev"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  evb_postgres_data:
+

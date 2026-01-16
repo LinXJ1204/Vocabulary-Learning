@@ -5,7 +5,7 @@ import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 
 function apiBaseUrl(): string {
-  return process.env.API_BASE_URL ?? "http://localhost:4000";
+  return process.env.API_INTERNAL_BASE_URL ?? process.env.API_BASE_URL ?? "http://localhost:4000";
 }
 
 const WORD_TEXT_MAX_LENGTH = 20;

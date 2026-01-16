@@ -1,0 +1,84 @@
+services:
+  evb_postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: evb
+      POSTGRES_PASSWORD: evb_password
+      POSTGRES_DB: evb_dev
+    volumes:
+      - evb_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U evb -d evb_dev"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  evb_api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    image: evb-api:local
+    environment:
+      NODE_ENV: production
+      PORT: 4000
+      DATABASE_URL: "postgresql://evb:evb_password@evb_postgres:5432/evb_dev?schema=public"
+
+      # IMPORTANT: Use the SAME public base URL as the web domain (so cookies work).
+      API_BASE_URL: "${PUBLIC_BASE_URL}"
+      WEB_BASE_URL: "${PUBLIC_BASE_URL}"
+
+      JWT_SECRET: "${JWT_SECRET}"
+      GOOGLE_CLIENT_ID: "${GOOGLE_CLIENT_ID:-}"
+      GOOGLE_CLIENT_SECRET: "${GOOGLE_CLIENT_SECRET:-}"
+
+      DAILY_ADD_LIMIT: "${DAILY_ADD_LIMIT:-30}"
+      TRANSLATION_PROVIDER: "${TRANSLATION_PROVIDER:-stub}"
+      GEMINI_API_KEY: "${GEMINI_API_KEY:-}"
+      GEMINI_MODEL: "${GEMINI_MODEL:-gemini-2.0-flash}"
+    depends_on:
+      evb_postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  evb_web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    image: evb-web:local
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+
+      # Browser uses PUBLIC_BASE_URL (Caddy routes /auth,/identity,/vocabulary to API)
+      API_BASE_URL: "${PUBLIC_BASE_URL}"
+      # Next server calls API directly on the docker network
+      API_INTERNAL_BASE_URL: "http://evb_api:4000"
+    depends_on:
+      - evb_api
+    restart: unless-stopped
+
+  evb_caddy:
+    image: caddy:2
+    environment:
+      # ex: you@example.com (for Let's Encrypt)
+      CADDY_EMAIL: "${CADDY_EMAIL}"
+      # ex: example.com
+      PUBLIC_HOST: "${PUBLIC_HOST}"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - evb_caddy_data:/data
+      - evb_caddy_config:/config
+    depends_on:
+      - evb_web
+      - evb_api
+    restart: unless-stopped
+
+volumes:
+  evb_postgres_data:
+  evb_caddy_data:
+  evb_caddy_config:
+

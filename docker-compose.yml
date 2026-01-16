@@ -15,6 +15,50 @@ services:
       timeout: 3s
       retries: 10
 
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    image: evb-api:local
+    environment:
+      NODE_ENV: production
+      PORT: 4000
+      # Use the docker network hostname (postgres) instead of localhost.
+      DATABASE_URL: "postgresql://evb:evb_password@postgres:5432/evb_dev?schema=public"
+      # Public URLs (used in OAuth redirect + safe returnTo)
+      API_BASE_URL: "http://localhost:4000"
+      WEB_BASE_URL: "http://localhost:3000"
+      # Secrets / OAuth (set these in your shell or a compose override)
+      JWT_SECRET: "${JWT_SECRET:-dev-secret-change-me}"
+      GOOGLE_CLIENT_ID: "${GOOGLE_CLIENT_ID:-}"
+      GOOGLE_CLIENT_SECRET: "${GOOGLE_CLIENT_SECRET:-}"
+      DAILY_ADD_LIMIT: "${DAILY_ADD_LIMIT:-30}"
+      TRANSLATION_PROVIDER: "${TRANSLATION_PROVIDER:-stub}"
+      GEMINI_API_KEY: "${GEMINI_API_KEY:-}"
+      GEMINI_MODEL: "${GEMINI_MODEL:-gemini-2.0-flash}"
+    ports:
+      - "4000:4000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    image: evb-web:local
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      # Public base URL (used to render the login link for the browser)
+      API_BASE_URL: "http://localhost:4000"
+      # Internal base URL (used by Next server to call the API container)
+      API_INTERNAL_BASE_URL: "http://api:4000"
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+
 volumes:
   evb_postgres_data:
 
