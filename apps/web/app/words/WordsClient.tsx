@@ -7,6 +7,7 @@ import { Badge } from "../../components/ui/Badge";
 import { Button } from "../../components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/Card";
 import { Input } from "../../components/ui/Input";
+import { Modal } from "../../components/ui/Modal";
 
 function ErrorText({ message }: { message?: string }) {
   if (!message) return null;
@@ -27,6 +28,7 @@ function SwipeToDeleteItem(props: {
   const [offset, setOffset] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   const [start, setStart] = useState<{ x: number; y: number; pointerId: number } | null>(null);
 
@@ -48,6 +50,8 @@ function SwipeToDeleteItem(props: {
         ].join(" ")}
         style={{ transform: `translateX(${offset}px)` }}
         onPointerDown={(e) => {
+          // If the confirm modal is open, ignore gestures.
+          if (confirmOpen) return;
           setStart({ x: e.clientX, y: e.clientY, pointerId: e.pointerId });
           setIsDragging(true);
           (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
@@ -81,21 +85,8 @@ function SwipeToDeleteItem(props: {
             return;
           }
 
-          // Swipe-to-end triggers confirm modal.
-          void (async () => {
-            const ok = window.confirm(`確定要刪除「${props.title}」嗎？`);
-            if (!ok) {
-              setOffset(0);
-              return;
-            }
-            setIsDeleting(true);
-            try {
-              await props.onDelete();
-            } finally {
-              setIsDeleting(false);
-              setOffset(0);
-            }
-          })();
+          // Swipe triggers confirm modal.
+          setConfirmOpen(true);
         }}
         onPointerCancel={() => {
           setIsDragging(false);
@@ -112,6 +103,49 @@ function SwipeToDeleteItem(props: {
           </span>
         </div>
       </div>
+
+      <Modal
+        open={confirmOpen}
+        onClose={() => {
+          setConfirmOpen(false);
+          setOffset(0);
+        }}
+        title="確認刪除"
+        description={`確定要刪除「${props.title}」嗎？此操作無法復原。`}
+        footer={
+          <>
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => {
+                setConfirmOpen(false);
+                setOffset(0);
+              }}
+              disabled={isDeleting}
+            >
+              取消
+            </Button>
+            <Button
+              type="button"
+              className="border border-red-200 bg-red-50 text-red-700 hover:bg-red-100"
+              variant="ghost"
+              onClick={async () => {
+                setIsDeleting(true);
+                try {
+                  await props.onDelete();
+                } finally {
+                  setIsDeleting(false);
+                  setConfirmOpen(false);
+                  setOffset(0);
+                }
+              }}
+              disabled={isDeleting}
+            >
+              {isDeleting ? "刪除中..." : "刪除"}
+            </Button>
+          </>
+        }
+      />
     </div>
   );
 }
@@ -129,15 +163,14 @@ export function WordsClient(props: {
 
   return (
     <main className="mx-auto max-w-5xl px-4 py-6 sm:py-10">
-      <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <header className="flex gap-3 justify-between items-start">
         <div className="space-y-1">
           <h1 className="text-2xl font-semibold tracking-tight">Words</h1>
           <div className="text-sm text-mutedForeground">
-            Signed in as <span className="font-medium text-foreground">{props.user.email}</span>
+            <span className="font-medium text-foreground">{props.user.email}</span>
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <Badge>user</Badge>
           <form action={logoutAction}>
             <Button type="submit" variant="secondary" size="sm">
               Logout
@@ -154,7 +187,6 @@ export function WordsClient(props: {
           <CardContent>
             <form className="flex flex-col gap-3 sm:flex-row sm:items-end" action={addAction}>
               <label className="grid flex-1 gap-2">
-                <span className="text-sm text-mutedForeground">New word</span>
                 <Input name="text" placeholder="hello" disabled={addPending} />
               </label>
               <Button type="submit" disabled={addPending} className="w-full sm:w-auto">
