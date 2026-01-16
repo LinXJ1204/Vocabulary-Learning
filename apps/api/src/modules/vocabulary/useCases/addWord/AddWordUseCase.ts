@@ -2,7 +2,16 @@ import type { AddWordResponse, AddWordRequest } from "./AddWordDTO";
 import type { IWordRepository } from "../../repos/IWordRepository";
 import type { ITranslationService } from "../../services/ITranslationService";
 import { Word } from "../../domain/Word";
+import { WordText } from "../../domain/WordText";
 import type { IUserRepository } from "../../../identity/repos/IUserRepository";
+
+function safeDailyLimit(): number {
+  const raw = process.env.DAILY_ADD_LIMIT ?? "30";
+  const n = Number.parseInt(raw, 10);
+  if (!Number.isFinite(n) || n <= 0) return 30;
+  // guardrail: prevent accidental huge values
+  return Math.min(n, 500);
+}
 
 export class AddWordUseCase {
   constructor(
@@ -13,10 +22,15 @@ export class AddWordUseCase {
 
   public async execute(req: AddWordRequest): Promise<AddWordResponse> {
     const userId = req.userId?.trim();
-    const text = req.text?.trim();
-    if (!userId || !text) {
+    if (!userId) {
       return { ok: false, error: { message: "userId and text are required" } };
     }
+
+    const textOrError = WordText.create(String(req.text ?? ""));
+    if (textOrError.isFailure) {
+      return { ok: false, error: { message: String(textOrError.error ?? "Invalid text") } };
+    }
+    const text = textOrError.getValue().value;
 
     // Ensure referenced user exists (DB enforces FK Word.userId -> User.id).
     const existingUser = await this.userRepo.findById(userId);
@@ -28,7 +42,7 @@ export class AddWordUseCase {
     }
 
     // Daily quota (UTC)
-    const limit = Number(process.env.DAILY_ADD_LIMIT ?? "30");
+    const limit = safeDailyLimit();
     const now = new Date();
     const start = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 0, 0, 0));
     const end = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1, 0, 0, 0));

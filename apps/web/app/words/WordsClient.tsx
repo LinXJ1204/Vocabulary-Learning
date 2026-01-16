@@ -155,6 +155,7 @@ export function WordsClient(props: {
   user: { id: string; email: string };
   words: WordDTO[];
 }) {
+  const WORD_TEXT_MAX_LENGTH = 20;
   const [addState, addAction, addPending] = useActionState<ActionState<WordDTO>, FormData>(
     addWordAction,
     { ok: true }
@@ -188,7 +189,14 @@ export function WordsClient(props: {
           <CardContent>
             <form className="flex flex-col gap-3 sm:flex-row sm:items-end" action={addAction}>
               <label className="grid flex-1 gap-2">
-                <Input name="text" placeholder="hello" disabled={addPending} />
+                <Input
+                  name="text"
+                  placeholder="hello"
+                  disabled={addPending}
+                  maxLength={WORD_TEXT_MAX_LENGTH}
+                  autoComplete="off"
+                />
+                <p className="text-xs text-mutedForeground">最多 {WORD_TEXT_MAX_LENGTH} 個字元</p>
               </label>
               <Button type="submit" disabled={addPending} className="w-full sm:w-auto">
                 {addPending ? "Adding..." : "Add"}

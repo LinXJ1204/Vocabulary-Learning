@@ -8,6 +8,8 @@ function apiBaseUrl(): string {
   return process.env.API_BASE_URL ?? "http://localhost:4000";
 }
 
+const WORD_TEXT_MAX_LENGTH = 20;
+
 export type ActionState<T> = {
   ok: boolean;
   data?: T;
@@ -31,22 +33,36 @@ export async function addWordAction(
 ): Promise<ActionState<WordDTO>> {
   const text = String(formData.get("text") ?? "").trim();
   if (!text) return { ok: false, error: "Word is required" };
+  if (text.length > WORD_TEXT_MAX_LENGTH) {
+    return { ok: false, error: `最多 ${WORD_TEXT_MAX_LENGTH} 個字元` };
+  }
 
   const jar = await cookies();
   const cookieHeader = jar.toString();
 
-  const res = await fetch(`${apiBaseUrl()}/vocabulary/words`, {
-    method: "POST",
-    headers: { "content-type": "application/json", cookie: cookieHeader },
-    body: JSON.stringify({ text }),
-    cache: "no-store"
-  });
+  try {
+    const res = await fetch(`${apiBaseUrl()}/vocabulary/words`, {
+      method: "POST",
+      headers: { "content-type": "application/json", cookie: cookieHeader },
+      body: JSON.stringify({ text }),
+      cache: "no-store"
+    });
 
-  const json = (await res.json()) as ApiResponse<WordDTO>;
-  if (!json.ok) return { ok: false, error: json.error.message };
+    // Always guard JSON parsing to avoid Next action "Internal error" when API is down / returns HTML.
+    let json: ApiResponse<WordDTO> | null = null;
+    try {
+      json = (await res.json()) as ApiResponse<WordDTO>;
+    } catch {
+      return { ok: false, error: `API 回應格式錯誤（HTTP ${res.status}）` };
+    }
 
-  revalidatePath("/words");
-  return { ok: true, data: json.data };
+    if (!json.ok) return { ok: false, error: json.error.message };
+
+    revalidatePath("/words");
+    return { ok: true, data: json.data };
+  } catch (e) {
+    return { ok: false, error: `無法連線到 API：${String((e as Error)?.message ?? e)}` };
+  }
 }
 
 export async function deleteWordAction(
