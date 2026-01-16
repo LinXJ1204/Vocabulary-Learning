@@ -1,25 +1,10 @@
 services:
-  evb_postgres:
-    image: postgres:16
-    environment:
-      POSTGRES_USER: evb
-      POSTGRES_PASSWORD: evb_password
-      POSTGRES_DB: evb_dev
-    volumes:
-      - evb_postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U evb -d evb_dev"]
-      interval: 5s
-      timeout: 3s
-      retries: 10
-    restart: unless-stopped
-
   evb_api:
-    image: "${EVB_API_IMAGE:-evb-api:local}"
+    image: "${IMAGE_REGISTRY}/${IMAGE_REPOSITORY}-api:${IMAGE_TAG}"
     environment:
       NODE_ENV: production
       PORT: 4000
-      DATABASE_URL: "postgresql://evb:evb_password@evb_postgres:5432/evb_dev?schema=public"
+      DATABASE_URL: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}?schema=public"
 
       # IMPORTANT: Use the SAME public base URL as the web domain (so cookies work).
       API_BASE_URL: "${PUBLIC_BASE_URL}"
@@ -33,13 +18,10 @@ services:
       TRANSLATION_PROVIDER: "${TRANSLATION_PROVIDER:-stub}"
       GEMINI_API_KEY: "${GEMINI_API_KEY:-}"
       GEMINI_MODEL: "${GEMINI_MODEL:-gemini-2.0-flash}"
-    depends_on:
-      evb_postgres:
-        condition: service_healthy
     restart: unless-stopped
 
   evb_web:
-    image: "${EVB_WEB_IMAGE:-evb-web:local}"
+    image: "${IMAGE_REGISTRY}/${IMAGE_REPOSITORY}-web:${IMAGE_TAG}"
     environment:
       NODE_ENV: production
       PORT: 3000
@@ -72,7 +54,6 @@ services:
     restart: unless-stopped
 
 volumes:
-  evb_postgres_data:
   evb_caddy_data:
   evb_caddy_config:
 

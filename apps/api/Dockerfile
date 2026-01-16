@@ -25,6 +25,10 @@ COPY --from=deps /app/pnpm-workspace.yaml ./pnpm-workspace.yaml
 COPY --from=deps /app/turbo.json ./turbo.json
 
 COPY apps/api ./apps/api
+COPY packages ./packages
+
+# Ensure workspace node_modules symlinks are created in this stage.
+RUN pnpm install --frozen-lockfile
 
 RUN pnpm --filter @evb/api build
 

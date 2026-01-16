@@ -23,6 +23,13 @@ COPY --from=deps /app/pnpm-workspace.yaml ./pnpm-workspace.yaml
 COPY --from=deps /app/turbo.json ./turbo.json
 
 COPY apps/web ./apps/web
+COPY packages ./packages
+
+# Ensure workspace node_modules symlinks are created in this stage.
+RUN pnpm install --frozen-lockfile
+
+# Build shared workspace types before web build.
+RUN pnpm --filter @evb/shared-types build
 
 RUN pnpm --filter @evb/web build
 
